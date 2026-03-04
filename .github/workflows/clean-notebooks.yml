@@ -1,0 +1,58 @@
+name: Colab to GitHub Notebook Metadata Sanitizer
+on:
+  push:
+    paths:
+      - '**.ipynb'
+
+jobs:
+  fix-notebook-render:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install nbformat
+        run: pip install nbformat
+
+      - name: Clean Notebooks
+        run: |
+          python - <<EOF
+          import nbformat
+          import glob
+          import os
+
+          # Find all notebooks in the repo
+          for path in glob.glob("**/*.ipynb", recursive=True):
+              with open(path, 'r', encoding='utf-8') as f:
+                  nb = nbformat.read(f, as_version=4)
+              
+              # 1. Strip the widget metadata (Fixes the GitHub 'state' error)
+              if 'widgets' in nb.metadata:
+                  del nb.metadata['widgets']
+                  print(f"Fixed metadata in {path}")
+
+              # 2. Clear problematic outputs (Login widgets and HTML videos)
+              for cell in nb.cells:
+                  if cell.cell_type == 'code':
+                      source = cell.source.lower()
+                      if 'notebook_login' in source or '%%html' in source:
+                          cell.outputs = []
+                          print(f"Cleared widget/video output in {path}")
+              
+              with open(path, 'w', encoding='utf-8') as f:
+                  nbformat.write(nb, f)
+          EOF
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: sanitize notebook for github rendering" && git push)
