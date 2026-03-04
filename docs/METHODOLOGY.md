@@ -246,7 +246,7 @@ This suggests effects are unlikely to be sampling artifacts.
 ## Reproducibility
 
 All code, data, and analysis available at:
-- **Code:** https://github.com/[YOUR_USERNAME]/omniASR-igbo-blindspots
+- **Code:** https://github.com/chizkidd/igbo-asr-tonal-evaluation
 - **Dataset:** https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots
 
 ### Environment
@@ -269,7 +269,6 @@ transcription = pipeline.transcribe(inp=[audio_path], lang=["ibo_Latn"])
 ### Privacy
 - All recordings self-made by author
 - No third-party identifiable information
-- Ground truth uses [name] placeholder for generalizability
 
 ### Cultural Sensitivity
 - Proverbs and idioms are common knowledge
