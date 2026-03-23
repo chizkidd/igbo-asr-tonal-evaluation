@@ -194,7 +194,7 @@ jupyter notebook analysis.ipynb  # Run all cells
 
 ## Citation
 
-If you use this dataset or code, please cite:
+If you use the dataset, please cite:
 
 ```bibtex
 @misc{obasi2026igbo,
