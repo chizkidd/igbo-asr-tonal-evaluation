@@ -1,6 +1,7 @@
 # Igbo ASR Tonal Evaluation
 
 [![Dataset](https://img.shields.io/badge/🤗%20Dataset-omniASR--igbo--blindspots-blue)](https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots)
+[![Docs](https://img.shields.io/badge/docs-Methodology%20%26%20References-blue)](docs/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Colab to GitHub Notebook Metadata Sanitizer](https://github.com/chizkidd/igbo-asr-tonal-evaluation/actions/workflows/clean-notebooks.yml/badge.svg)](https://github.com/chizkidd/igbo-asr-tonal-evaluation/actions/workflows/clean-notebooks.yml)
@@ -92,7 +93,8 @@ igbo-asr-tonal-evaluation/
 │   │   └── igbo_tonal.m4a
 │   └── metadata.csv                      # Ground truth, model outputs, metrics
 ├── docs/
-│   └── METHODOLOGY.md                    # Detailed research methodology
+│   ├── METHODOLOGY.md                    # Detailed research methodology
+│   └── REFERENCES.md                     # Full list of academic citations
 ├── results/
 │   └── visualizations/
 │       ├── fig1_loss_by_category.png
@@ -109,7 +111,10 @@ igbo-asr-tonal-evaluation/
 └── requirements.txt                      # Python dependencies
 ```
 
+## Documentation
 
+- [**Methodology**](docs/METHODOLOGY.md) – Detailed research design, metric definitions (DER, bootstrap CIs), error taxonomy, and recording protocol.
+- [**References**](docs/REFERENCES.md) – Full list of academic works cited in this project, including papers on ASR fairness, low-resource languages, and Igbo diacritic restoration.
 
 ## Key Results
 
@@ -214,6 +219,8 @@ If you use the dataset, please cite:
 - **Dataset:** [HuggingFace Hub](https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots)
 - **Model:** [omniASR-CTC-1B](https://huggingface.co/facebook/omniASR-CTC-1B)
 - **Paper:** [Meta AI - Omnilingual ASR (arXiv:2511.09690)](https://arxiv.org/abs/2511.09690)
+
+For a full bibliography of referenced academic works, see [**References**](docs/REFERENCES.md).
 
 ## Future Work
 
