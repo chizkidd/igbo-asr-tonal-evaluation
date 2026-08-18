@@ -1,3 +1,5 @@
+
+
 # Igbo ASR Tonal Evaluation
 
 [![Dataset](https://img.shields.io/badge/🤗%20Dataset-omniASR--igbo--blindspots-blue)](https://huggingface.co/datasets/chiz/omniASR-igbo-blindspots)
@@ -189,7 +191,7 @@ df = load_metadata("data/metadata.csv")
 df = compute_all_metrics(df)
 
 # Generate visualizations
-plot_loss_by_category(df, output_path="results/visualizations/fig1.png")
+plot_loss_by_category(df, output_path="results/visualizations/fig1_loss_by_category.png")
 ```
 
 ### Reproduce Results
