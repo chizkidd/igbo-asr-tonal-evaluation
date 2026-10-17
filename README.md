@@ -18,7 +18,7 @@ This is a small diagnostic study (21 clips, one speaker) of how `omniASR-CTC-1B`
 - **Marks are also added:** 25 marks appear where the reference has none or fewer (**added rate 25.8%** overall), so net loss (26.8%) understates how often the output disagrees with the reference. Pooled **DER is 78.4%**.
 - **Minimal pairs collapse:** on the akwa and oke clips the output carries no tone marks at all.
 
-**Reading these results:** the pattern is *consistent with* the model leaning on text-like priors rather than tone acoustics, but this study cannot show that. It has one speaker, 21 clips, a single annotator, and no comparison model. Treat it as a blind-spot probe, not a measurement of prevalence.
+**Reading these results:** the pattern is *consistent with* the model leaning on text-like priors rather than tone acoustics, but this study cannot show that. It has one speaker, 21 clips, a single annotator, and no comparison model. Treat it as a blind-spot probe, not a measurement of prevalence. I wrote a [blogpost](https://chizkidd.github.io/2026/03/01/tonal-fidelity-multilingual-asr/) about my findings.
 
 Explore the numbers interactively: **Igbo tone-loss explorer** in [ml-viz](https://github.com/chizkidd/ml-viz).
 
