@@ -125,7 +125,13 @@ igbo-asr-tonal-evaluation/
 
 ### Quantitative Summary
 
-E = expected marks, D = dropped, H = added (both counted per clip, then summed). Net = (E - P) / E. Drop = D / E. Added = H / E. DER = (D + H) / E.
+* E = expected marks, 
+* D = dropped
+* H = added (both counted per clip, then summed). 
+* Net = (E - P) / E. 
+* Drop = D / E. 
+* Added = H / E. 
+* DER = (D + H) / E.
 
 | Category | Clips | E | Dropped | Added | Net loss | Drop rate | Added rate | DER | Mean CER |
 |---|---|---|---|---|---|---|---|---|---|
