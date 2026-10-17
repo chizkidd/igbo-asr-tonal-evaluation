@@ -229,7 +229,7 @@ def generate_all_figures(
     # Figure 3: Bootstrap CIs
     plot_bootstrap_ci(
         bootstrap_results,
-        output_path=output_path / "fig3_bootstrap_ci.png"
+        output_path=output_path / "fig3_bootstrap_95_ci.png"
     )
     
     print(f"\nAll figures saved to: {output_path}")
