@@ -23,67 +23,66 @@ plt.rcParams['axes.labelsize'] = 11
 plt.rcParams['axes.titlesize'] = 12
 
 
+CATEGORY_COLORS = {
+    'tonal_diacritics': '#d62728',
+    'code_switching': '#ff7f0e',
+    'cultural_context': '#1f77b4',
+    'script_hallucination': '#2ca02c',
+}
+DROPPED_COLOR = '#d62728'
+ADDED_COLOR = '#7f7f7f'
+
+
 def plot_loss_by_category(
     df: pd.DataFrame,
     output_path: Optional[str] = None,
     figsize: tuple = (10, 6)
 ):
     """
-    Create horizontal bar chart of diacritic loss by category.
-    
+    Paired horizontal bars per category: drop rate and added rate, both as a
+    percentage of expected marks. D and H are computed per clip, then summed,
+    so additions in one clip never cancel drops in another.
+
     Args:
         df: DataFrame with columns 'category', 'diacritics_expected', 'diacritics_produced'
         output_path: Where to save figure (optional)
         figsize: Figure size in inches
     """
-    # Drop rate by category: D_i = max(0, E_i - P_i) per clip, then summed.
     d = df.copy()
     d['dropped'] = (d['diacritics_expected'] - d['diacritics_produced']).clip(lower=0)
     d['added'] = (d['diacritics_produced'] - d['diacritics_expected']).clip(lower=0)
-    category_stats = d.groupby('category').agg(
+    s = d.groupby('category').agg(
         dropped=('dropped', 'sum'), added=('added', 'sum'),
-        diacritics_expected=('diacritics_expected', 'sum'))
-    category_stats['loss_rate'] = category_stats['dropped'] / category_stats['diacritics_expected'] * 100
-    category_stats['added_rate'] = category_stats['added'] / category_stats['diacritics_expected'] * 100
-    category_stats = category_stats.sort_values('loss_rate')
-    
-    # Create figure
+        expected=('diacritics_expected', 'sum'))
+    s['drop_rate'] = s['dropped'] / s['expected'] * 100
+    s['added_rate'] = s['added'] / s['expected'] * 100
+    s = s.sort_values('drop_rate')            # largest drop rate ends up on top
+
     fig, ax = plt.subplots(figsize=figsize)
-    
-    # Color code by severity
-    colors = []
-    for rate in category_stats['loss_rate']:
-        if rate > 50:
-            colors.append('#d62728')  # Red (severe)
-        elif rate > 20:
-            colors.append('#ff7f0e')  # Orange (moderate)
-        else:
-            colors.append('#2ca02c')  # Green (low)
-    
-    # Plot
-    bars = ax.barh(category_stats.index, category_stats['loss_rate'], color=colors)
-    
-    # Add value labels (drop rate, plus the added rate so additions stay visible)
-    for i, (idx, row) in enumerate(category_stats.iterrows()):
-        ax.text(
-            row['loss_rate'] + 2, i,
-            f"{row['loss_rate']:.1f}% dropped  (+{row['added_rate']:.0f}% added)",
-            va='center', ha='left', fontweight='bold'
-        )
-    ax.set_xlim(0, 125)
-    
-    # Formatting
-    ax.set_xlabel('Diacritic drop rate (% of expected marks)', fontweight='bold')
-    ax.set_title('Diacritic Drop Rate by Category', fontweight='bold', pad=15)
-    ax.axvline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.3)
+    y = np.arange(len(s))
+    h = 0.38
+    ax.barh(y + h / 2, s['drop_rate'], height=h, color=DROPPED_COLOR, label='Dropped (% of expected marks)')
+    ax.barh(y - h / 2, s['added_rate'], height=h, color=ADDED_COLOR, label='Added (% of expected marks)')
+
+    for i, (_, row) in enumerate(s.iterrows()):
+        ax.text(row['drop_rate'] + 1.5, i + h / 2, f"{row['drop_rate']:.1f}%  ({int(row['dropped'])}/{int(row['expected'])})",
+                va='center', ha='left', fontsize=9, fontweight='bold')
+        ax.text(row['added_rate'] + 1.5, i - h / 2, f"{row['added_rate']:.1f}%  (+{int(row['added'])})",
+                va='center', ha='left', fontsize=9, color='#444444')
+
+    ax.set_yticks(y)
+    ax.set_yticklabels([c.replace('_', ' ').title() for c in s.index])
+    ax.set_xlim(0, max(100, float(s[['drop_rate', 'added_rate']].values.max()) + 30))
+    ax.set_xlabel('% of expected marks', fontweight='bold')
+    ax.set_title('Marks dropped vs. marks added, by category', fontweight='bold', pad=15)
     ax.grid(axis='x', alpha=0.3)
-    
+    ax.grid(axis='y', visible=False)
+    ax.legend(loc='lower right', framealpha=0.9)
+
     plt.tight_layout()
-    
     if output_path:
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         print(f"Saved: {output_path}")
-    
     plt.close(fig) if output_path else plt.show()
 
 
@@ -111,7 +110,8 @@ def plot_cer_vs_loss(
     
     # Color by category
     categories = df['category'].unique()
-    colors = sns.color_palette("husl", len(categories))
+    fallback = sns.color_palette("husl", len(categories))
+    colors = [CATEGORY_COLORS.get(c, fallback[i]) for i, c in enumerate(categories)]
     
     for i, cat in enumerate(categories):
         cat_data = df[df['category'] == cat]
@@ -143,7 +143,8 @@ def plot_cer_vs_loss(
 def plot_bootstrap_ci(
     bootstrap_results: dict,
     output_path: Optional[str] = None,
-    figsize: tuple = (10, 6)
+    figsize: tuple = (10, 6),
+    show_threshold: bool = False
 ):
     """
     Forest plot of bootstrap confidence intervals.
@@ -176,15 +177,17 @@ def plot_bootstrap_ci(
         color='#1f77b4', ecolor='#1f77b4', alpha=0.8
     )
     
-    # Add 50% threshold line
-    ax.axvline(50, color='red', linestyle='--', linewidth=1.5, alpha=0.5, label='50% threshold')
+    # Optional 50% reference line (a convention, not a statistical threshold)
+    if show_threshold:
+        ax.axvline(50, color='red', linestyle='--', linewidth=1.5, alpha=0.5, label='50% reference')
     
     # Formatting
     ax.set_yticks(y_pos)
     ax.set_yticklabels([c.replace('_', ' ').title() for c in categories])
     ax.set_xlabel('Diacritic drop rate (%)', fontweight='bold')
     ax.set_title('Drop rate, 95% bootstrap CI (clip-level resampling)', fontweight='bold', pad=15)
-    ax.legend(loc='lower right')
+    if show_threshold:
+        ax.legend(loc='lower right')
     ax.grid(axis='x', alpha=0.3)
     
     plt.tight_layout()
@@ -229,7 +232,7 @@ def generate_all_figures(
     # Figure 3: Bootstrap CIs
     plot_bootstrap_ci(
         bootstrap_results,
-        output_path=output_path / "fig3_bootstrap_95_ci.png"
+        output_path=output_path / "fig3_bootstrap_ci.png"
     )
     
     print(f"\nAll figures saved to: {output_path}")
