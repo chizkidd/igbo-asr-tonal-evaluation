@@ -51,9 +51,13 @@ def print_summary(df: pd.DataFrame):
         print(f"  {cat}: {count}")
     
     if 'diacritics_expected' in df.columns:
-        print(f"\nTotal expected diacritics: {df['diacritics_expected'].sum()}")
-        print(f"Total produced diacritics: {df['diacritics_produced'].sum()}")
-        print(f"Net loss: {df['diacritic_loss'].sum()}")
+        E = df['diacritics_expected'].sum()
+        P = df['diacritics_produced'].sum()
+        D = (df['diacritics_expected'] - df['diacritics_produced']).clip(lower=0).sum()
+        H = (df['diacritics_produced'] - df['diacritics_expected']).clip(lower=0).sum()
+        print(f"\nExpected marks: {E}   Produced marks: {P}")
+        print(f"Dropped (per clip): {D}   Added (per clip): {H}")
+        print(f"Net loss {(E-P)/E:.1%} | drop rate {D/E:.1%} | added rate {H/E:.1%} | DER {(D+H)/E:.1%}")
     
     if 'character_error_rate' in df.columns:
         print(f"\nAverage CER: {df['character_error_rate'].mean():.3f}")
@@ -71,18 +75,24 @@ def category_breakdown(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with category statistics
     """
-    stats = df.groupby('category').agg({
-        'file_name': 'count',
-        'diacritic_loss': 'sum',
-        'diacritics_expected': 'sum',
-        'character_error_rate': 'mean'
-    }).rename(columns={
-        'file_name': 'samples',
-        'character_error_rate': 'avg_cer'
-    })
-    
-    stats['loss_rate'] = stats['diacritic_loss'] / stats['diacritics_expected']
-    
+    df = df.copy()
+    E, P = df['diacritics_expected'], df['diacritics_produced']
+    df['dropped'] = (E - P).clip(lower=0)
+    df['added'] = (P - E).clip(lower=0)
+    cer_col = 'cer' if 'cer' in df.columns else 'character_error_rate'
+
+    stats = df.groupby('category').agg(
+        samples=('file_name', 'count'),
+        expected=('diacritics_expected', 'sum'),
+        produced=('diacritics_produced', 'sum'),
+        dropped=('dropped', 'sum'),
+        added=('added', 'sum'),
+        avg_cer=(cer_col, 'mean'),
+    )
+    stats['net_loss'] = (stats['expected'] - stats['produced']) / stats['expected']
+    stats['drop_rate'] = stats['dropped'] / stats['expected']
+    stats['added_rate'] = stats['added'] / stats['expected']
+    stats['DER'] = (stats['dropped'] + stats['added']) / stats['expected']
     return stats
 
 
@@ -115,15 +125,21 @@ def export_results(
 
 def validate_audio_files(
     metadata_path: str,
-    audio_dir: str = "data/audio"
+    audio_dir: str = "data",
+    extensions: tuple = (".wav", ".m4a")
 ) -> List[str]:
     """
     Check if all audio files referenced in metadata exist.
-    
+
+    metadata.csv lists paths like "audio/01_script_names.wav" (relative to
+    data/), while the raw recordings in this repo may be .m4a. A file counts as
+    present if it exists under any of `extensions`.
+
     Args:
         metadata_path: Path to metadata CSV
-        audio_dir: Directory containing audio files
-        
+        audio_dir: Directory that file_name is relative to (default "data")
+        extensions: Extensions to try, in order
+
     Returns:
         List of missing files (empty if all present)
     """
@@ -132,16 +148,16 @@ def validate_audio_files(
     
     missing = []
     for filename in df['file_name']:
-        filepath = audio_path / filename
-        if not filepath.exists():
+        stem = (audio_path / filename).with_suffix('')
+        if not any(stem.with_suffix(ext).exists() for ext in extensions):
             missing.append(filename)
     
     if missing:
-        print(f"⚠️  Missing {len(missing)} audio files:")
+        print(f"WARNING: Missing {len(missing)} audio files:")
         for f in missing:
             print(f"  - {f}")
     else:
-        print(f"✓ All {len(df)} audio files present")
+        print(f"OK: All {len(df)} audio files present")
     
     return missing
 

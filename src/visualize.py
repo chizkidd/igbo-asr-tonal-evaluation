@@ -2,9 +2,9 @@
 Visualization functions for ASR tonal fidelity analysis.
 
 Generates publication-quality figures for:
-- Diacritic loss by category
-- CER vs diacritic loss scatter
-- Bootstrap confidence intervals
+- Diacritic drop rate by category (drops counted per clip, never netted)
+- CER vs drop rate scatter (per clip)
+- Bootstrap confidence intervals (clip-level resampling)
 """
 
 import matplotlib.pyplot as plt
@@ -32,18 +32,19 @@ def plot_loss_by_category(
     Create horizontal bar chart of diacritic loss by category.
     
     Args:
-        df: DataFrame with columns 'category', 'diacritic_loss', 'diacritics_expected'
+        df: DataFrame with columns 'category', 'diacritics_expected', 'diacritics_produced'
         output_path: Where to save figure (optional)
         figsize: Figure size in inches
     """
-    # Calculate loss rate by category
-    category_stats = df.groupby('category').agg({
-        'diacritic_loss': 'sum',
-        'diacritics_expected': 'sum'
-    })
-    category_stats['loss_rate'] = (
-        category_stats['diacritic_loss'] / category_stats['diacritics_expected'] * 100
-    )
+    # Drop rate by category: D_i = max(0, E_i - P_i) per clip, then summed.
+    d = df.copy()
+    d['dropped'] = (d['diacritics_expected'] - d['diacritics_produced']).clip(lower=0)
+    d['added'] = (d['diacritics_produced'] - d['diacritics_expected']).clip(lower=0)
+    category_stats = d.groupby('category').agg(
+        dropped=('dropped', 'sum'), added=('added', 'sum'),
+        diacritics_expected=('diacritics_expected', 'sum'))
+    category_stats['loss_rate'] = category_stats['dropped'] / category_stats['diacritics_expected'] * 100
+    category_stats['added_rate'] = category_stats['added'] / category_stats['diacritics_expected'] * 100
     category_stats = category_stats.sort_values('loss_rate')
     
     # Create figure
@@ -56,29 +57,24 @@ def plot_loss_by_category(
             colors.append('#d62728')  # Red (severe)
         elif rate > 20:
             colors.append('#ff7f0e')  # Orange (moderate)
-        elif rate > 0:
-            colors.append('#2ca02c')  # Green (low)
         else:
-            colors.append('#9467bd')  # Purple (hallucination)
+            colors.append('#2ca02c')  # Green (low)
     
     # Plot
     bars = ax.barh(category_stats.index, category_stats['loss_rate'], color=colors)
     
-    # Add value labels
+    # Add value labels (drop rate, plus the added rate so additions stay visible)
     for i, (idx, row) in enumerate(category_stats.iterrows()):
-        value = row['loss_rate']
         ax.text(
-            value + 2 if value >= 0 else value - 2,
-            i,
-            f"{value:.1f}%",
-            va='center',
-            ha='left' if value >= 0 else 'right',
-            fontweight='bold'
+            row['loss_rate'] + 2, i,
+            f"{row['loss_rate']:.1f}% dropped  (+{row['added_rate']:.0f}% added)",
+            va='center', ha='left', fontweight='bold'
         )
+    ax.set_xlim(0, 125)
     
     # Formatting
-    ax.set_xlabel('Diacritic Loss Rate (%)', fontweight='bold')
-    ax.set_title('Diacritic Loss by Error Category', fontweight='bold', pad=15)
+    ax.set_xlabel('Diacritic drop rate (% of expected marks)', fontweight='bold')
+    ax.set_title('Diacritic Drop Rate by Category', fontweight='bold', pad=15)
     ax.axvline(0, color='black', linewidth=0.8, linestyle='--', alpha=0.3)
     ax.grid(axis='x', alpha=0.3)
     
@@ -88,7 +84,7 @@ def plot_loss_by_category(
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         print(f"Saved: {output_path}")
     
-    plt.show()
+    plt.close(fig) if output_path else plt.show()
 
 
 def plot_cer_vs_loss(
@@ -100,12 +96,15 @@ def plot_cer_vs_loss(
     Scatter plot of CER vs diacritic loss.
     
     Args:
-        df: DataFrame with columns 'character_error_rate', 'diacritic_loss', 'category'
+        df: DataFrame with 'cer' (or 'character_error_rate'), expected/produced counts, 'category'
         output_path: Where to save figure (optional)
         figsize: Figure size in inches
     """
-    # Calculate per-sample loss rate
-    df['loss_rate'] = df['diacritic_loss'] / df['diacritics_expected'] * 100
+    # Per-clip drop rate; clips with no expected marks have no defined rate
+    df = df[df['diacritics_expected'] > 0].copy()
+    df['dropped'] = (df['diacritics_expected'] - df['diacritics_produced']).clip(lower=0)
+    df['loss_rate'] = df['dropped'] / df['diacritics_expected'] * 100
+    cer_col = 'cer' if 'cer' in df.columns else 'character_error_rate'
     
     # Create figure
     fig, ax = plt.subplots(figsize=figsize)
@@ -117,7 +116,7 @@ def plot_cer_vs_loss(
     for i, cat in enumerate(categories):
         cat_data = df[df['category'] == cat]
         ax.scatter(
-            cat_data['character_error_rate'] * 100,
+            cat_data[cer_col] * 100,
             cat_data['loss_rate'],
             label=cat.replace('_', ' ').title(),
             alpha=0.7,
@@ -126,9 +125,9 @@ def plot_cer_vs_loss(
         )
     
     # Formatting
-    ax.set_xlabel('Character Error Rate (%)', fontweight='bold')
-    ax.set_ylabel('Diacritic Loss Rate (%)', fontweight='bold')
-    ax.set_title('CER vs. Diacritic Loss (by Sample)', fontweight='bold', pad=15)
+    ax.set_xlabel('Character error rate (%)', fontweight='bold')
+    ax.set_ylabel('Diacritic drop rate (%)', fontweight='bold')
+    ax.set_title('CER vs. Drop Rate (clips with expected marks)', fontweight='bold', pad=15)
     ax.legend(loc='upper left', framealpha=0.9)
     ax.grid(alpha=0.3)
     
@@ -138,7 +137,7 @@ def plot_cer_vs_loss(
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         print(f"Saved: {output_path}")
     
-    plt.show()
+    plt.close(fig) if output_path else plt.show()
 
 
 def plot_bootstrap_ci(
@@ -150,15 +149,19 @@ def plot_bootstrap_ci(
     Forest plot of bootstrap confidence intervals.
     
     Args:
-        bootstrap_results: Dict mapping category -> (point, lo, hi)
+        bootstrap_results: Dict mapping category -> (point, lo, hi), or the dict
+            returned by evaluate.bootstrap_ci (keys point, lo, hi)
         output_path: Where to save figure (optional)
         figsize: Figure size in inches
     """
     # Prepare data
-    categories = list(bootstrap_results.keys())
-    points = [v[0] * 100 for v in bootstrap_results.values()]
-    lows = [v[1] * 100 for v in bootstrap_results.values()]
-    highs = [v[2] * 100 for v in bootstrap_results.values()]
+    def _t(v):
+        return (v['point'], v['lo'], v['hi']) if isinstance(v, dict) else tuple(v)
+    vals = {k: _t(v) for k, v in bootstrap_results.items()}
+    categories = list(vals.keys())
+    points = [v[0] * 100 for v in vals.values()]
+    lows = [v[1] * 100 for v in vals.values()]
+    highs = [v[2] * 100 for v in vals.values()]
     errors = [[p - l for p, l in zip(points, lows)],
               [h - p for h, p in zip(highs, points)]]
     
@@ -179,8 +182,8 @@ def plot_bootstrap_ci(
     # Formatting
     ax.set_yticks(y_pos)
     ax.set_yticklabels([c.replace('_', ' ').title() for c in categories])
-    ax.set_xlabel('Diacritic Loss Rate (%)', fontweight='bold')
-    ax.set_title('Bootstrap 95% Confidence Intervals', fontweight='bold', pad=15)
+    ax.set_xlabel('Diacritic drop rate (%)', fontweight='bold')
+    ax.set_title('Drop rate, 95% bootstrap CI (clip-level resampling)', fontweight='bold', pad=15)
     ax.legend(loc='lower right')
     ax.grid(axis='x', alpha=0.3)
     
@@ -190,7 +193,7 @@ def plot_bootstrap_ci(
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         print(f"Saved: {output_path}")
     
-    plt.show()
+    plt.close(fig) if output_path else plt.show()
 
 
 def generate_all_figures(
@@ -214,13 +217,13 @@ def generate_all_figures(
     # Figure 1: Loss by category
     plot_loss_by_category(
         df,
-        output_path=output_path / "fig1_loss_by_category.png"
+        output_path=output_path / "fig1_drop_rate_by_category.png"
     )
     
     # Figure 2: CER vs loss
     plot_cer_vs_loss(
         df,
-        output_path=output_path / "fig2_cer_vs_diacritic_loss.png"
+        output_path=output_path / "fig2_cer_vs_drop_rate.png"
     )
     
     # Figure 3: Bootstrap CIs
@@ -239,16 +242,14 @@ if __name__ == "__main__":
         print("Usage: python visualize.py <metadata_analyzed.csv>")
         sys.exit(1)
     
-    # Load data
-    df = pd.read_csv(sys.argv[1])
-    
-    # Example bootstrap results (replace with actual computation)
-    bootstrap_results = {
-        'overall': (0.526, 0.303, 0.697),
-        'tonal_diacritics': (0.755, 0.571, 0.897),
-        'script_hallucination': (0.360, 0.087, 0.680),
-    }
-    
+    from evaluate import add_clip_columns, bootstrap_ci, stat_drop_rate
+
+    # Load data and compute everything from the data (no hard-coded results)
+    df = add_clip_columns(pd.read_csv(sys.argv[1]))
+    bootstrap_results = {'overall': bootstrap_ci(df, stat_drop_rate)}
+    for cat, g in df.groupby('category'):
+        bootstrap_results[cat] = bootstrap_ci(g, stat_drop_rate)
+
     # Generate all figures
     output_dir = sys.argv[2] if len(sys.argv) > 2 else "visualizations"
     generate_all_figures(df, bootstrap_results, output_dir)
