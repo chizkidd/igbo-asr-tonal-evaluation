@@ -102,7 +102,7 @@ igbo-asr-tonal-evaluation/
 │   └── visualizations/
 │       ├── fig1_drop_rate_by_category.png
 │       ├── fig2_cer_vs_drop_rate.png
-│       └── fig3_bootstrap_ci.png
+│       └── fig3_bootstrap_95_ci.png
 ├── src/
 │   ├── evaluate.py                       # Evaluation metrics (DER, bootstrap CIs)
 │   ├── visualize.py                      # Plotting functions
