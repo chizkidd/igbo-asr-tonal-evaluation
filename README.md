@@ -40,10 +40,10 @@ Audio files are included in this repository (M4A format). Click to play directly
 - [06_tonal_akwa.m4a](data/audio/06_tonal_akwa.m4a) - 4 different words collapsed to random outputs
 
 **Monotone Hallucination:**
-- [09_tonal_flat.m4a](data/audio/09_tonal_flat.m4a) - Flat speech, model ADDED tones that weren't spoken
+- [09_tonal_flat.m4a](data/audio/09_tonal_flat.m4a) - Flat speech; the output has 7 marks the reference does not (3 tone marks, 4 dot-below letters)
 
 **Code-Switching:**
-- [11_codeswitch_en2ig.m4a](data/audio/11_codeswitch_en2ig.m4a) - English perfect, Igbo loses tones
+- [11_codeswitch_en2ig.m4a](data/audio/11_codeswitch_en2ig.m4a) - English mostly transcribed, adjacent Igbo loses marks
 
 ## Quick Start
 
@@ -52,17 +52,22 @@ Audio files are included in this repository (M4A format). Click to play directly
 ```bash
 git clone https://github.com/chizkidd/igbo-asr-tonal-evaluation.git
 cd igbo-asr-tonal-evaluation
-pip install -r requirements.txt
+python3 -m pip install -r requirements-analysis.txt   # CPU-only analysis
 ```
+
+`requirements.txt` is only needed to re-run model inference (`analysis.ipynb`), which needs a GPU and `omnilingual-asr`.
 
 ### Run Analysis
 
 ```bash
-jupyter notebook analysis.ipynb
+python3 src/evaluate.py data/metadata.csv
+jupyter notebook analysis-2.ipynb
 ```
 
-Or open in Google Colab:
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis.ipynb)
+Or open the corrected analysis in Google Colab (it clones the repo in its first cell):
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/chizkidd/igbo-asr-tonal-evaluation/blob/main/analysis-2.ipynb)
+
+The original inference run is [analysis.ipynb](analysis.ipynb); its metric cells predate the corrections described in [CHANGELOG.md](CHANGELOG.md).
 
 ## Repository Structure
 
@@ -201,7 +206,7 @@ See [METHODOLOGY.md](docs/METHODOLOGY.md) for detailed research design.
 
 ### Run the Full Analysis
 ```bash
-jupyter notebook analysis.ipynb
+jupyter notebook analysis-2.ipynb   # corrected, offline
 ```
 
 ### Use the Evaluation Library
@@ -263,10 +268,9 @@ For a full bibliography of referenced academic works, see [**References**](docs/
 ## License
 
 - **Code:** MIT License
-- **Audio recordings:** CC-BY-4.0 (attribution required)
-- **Metadata/annotations:** CC0 (public domain)
+- **Dataset (audio, transcripts, annotations, metadata, model outputs):** CC BY 4.0 (attribution required), as on the [dataset card](https://huggingface.co/datasets/Chiz/omniASR-igbo-blindspots)
 
-See [LICENSE](LICENSE) for details.
+The [LICENSE](LICENSE) file covers the code (MIT) only; the dataset is licensed separately as listed above.
 
 ## Author
 

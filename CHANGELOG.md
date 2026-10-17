@@ -22,12 +22,14 @@ Claims softened or corrected
 - Single-annotator ground truth added to the limitations.
 
 Housekeeping
-- `src/visualize.py` no longer ships hard-coded example bootstrap values (one was invented: script_hallucination 0.360 [0.087, 0.680]); it computes them from the data. Figures renamed `fig1_drop_rate_by_category`, `fig2_cer_vs_drop_rate`.
+- `src/visualize.py` no longer ships hard-coded example bootstrap values. The script_hallucination entry (0.360 [0.087, 0.680]) was a real interval, but for the share of produced marks that are additions (H/P), not for drop rate, so it sat on a drop-rate axis next to tonal and overall drop rates. Everything is now computed from the data, and H/P is reported under its own name. Figures renamed `fig1_drop_rate_by_category`, `fig2_cer_vs_drop_rate`, `fig3_bootstrap_95_ci`.
 - `src/utils.py`: `validate_audio_files` resolves `audio/NN_*.wav` metadata paths against `.wav` or `.m4a` files; `category_breakdown` reports all metrics.
 - Dataset links use `Chiz/` capitalization.
 - New `analysis-2.ipynb` (offline, CPU, executed outputs included except figures).
 
 Still to verify by hand
-- `analysis.ipynb` cell 1 title says omniASR-CTC-3B while the model evaluated is CTC-1B.
+- `analysis.ipynb`: title corrected to omniASR-CTC-1B and a banner added pointing to `analysis-2.ipynb`; its metric cells keep the original (uncorrected) definitions and some template cells are unfilled.
+- `docs/REFERENCES.md`: replaced with verified bibliographic details (the earlier list had a wrong author list for the ACM Computing Surveys review and wrong venues for two papers).
+- `requirements-analysis.txt`: new, minimal CPU-only dependencies. `requirements.txt` is only for model inference.
 - Tone-to-meaning glosses for the akwa clip.
 - Whether `data/metadata.csv` should point at `.m4a` (the files in the repo) or `.wav`.

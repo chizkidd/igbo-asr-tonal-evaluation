@@ -17,9 +17,11 @@ Our approach:
 - **Minimal pairs** to test phonemic distinctions
 - **Control conditions** (monotone speech, code-switching, other languages)
 
-This follows methodological frameworks from:
-- Koenecke et al. (2020): Demographic ASR fairness evaluation
-- EMNLP 2024: Dialect bias in ASR (controlled single-speaker designs)
+This is in the spirit of earlier ASR bias audits:
+- Koenecke et al. (2020): Racial disparities in commercial ASR
+- Harris et al. (2024): Gender and dialect bias in ASR (EMNLP Findings)
+
+Full citations are in [REFERENCES.md](REFERENCES.md).
 
 ---
 

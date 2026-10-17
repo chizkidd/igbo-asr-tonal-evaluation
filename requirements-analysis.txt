@@ -1,0 +1,6 @@
+# Minimal dependencies to reproduce the analysis from data/metadata.csv (CPU only).
+# For the original model-inference run (GPU) use requirements.txt instead.
+pandas>=2.0.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
