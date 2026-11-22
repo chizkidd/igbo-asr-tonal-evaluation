@@ -8,7 +8,9 @@
 ![visitor badge](https://visitor-badge.laobi.icu/badge?page_id=chizkidd.igbo-asr-tonal-evaluation)
 ![Hugging Face Downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fhuggingface.co%2Fapi%2Fdatasets%2FChiz%2FomniASR-igbo-blindspots%3Fexpand%255B%255D%3Ddownloads%26expand%255B%255D%3DdownloadsAllTime&query=%24.downloadsAllTime&label=HuggingFace%20Downloads&color=blue)
 
-Systematic evaluation of tonal fidelity in facebook/omniASR-CTC-1B when processing Igbo, a tonal Niger-Congo language with ~45 million speakers.
+A small diagnostic evaluation of tonal fidelity in facebook/omniASR-CTC-1B when processing Igbo, a tonal Niger-Congo language with ~45 million speakers.
+
+<!-- Systematic evaluation of tonal fidelity in facebook/omniASR-CTC-1B when processing Igbo, a tonal Niger-Congo language with ~45 million speakers.A small diagnostic probe (21 clips, one speaker) of tone and diacritic handling in facebook/omniASR-CTC-1B on Igbo, a tonal Niger-Congo language with ~45 million speakers. -->
 
 ## Overview
 
@@ -37,13 +39,13 @@ Explore the numbers interactively: **Igbo tone-loss explorer** in [ml-viz](https
 Audio files are included in this repository (M4A format). Click to play directly on GitHub:
 
 **Tonal Minimal Pairs:**
-- [06_tonal_akwa.m4a](data/audio/06_tonal_akwa.m4a) - 4 different words collapsed to random outputs
+- [06_tonal_akwa.m4a](data/audio/06_tonal_akwa.m4a): 4 different words collapsed to random outputs
 
-**Monotone Hallucination:**
-- [09_tonal_flat.m4a](data/audio/09_tonal_flat.m4a) - Flat speech; the output has 7 marks the reference does not (3 tone marks, 4 dot-below letters)
+**Monotone Control:**
+- [09_tonal_flat.m4a](data/audio/09_tonal_flat.m4a): Flat speech; the output has 7 marks the reference does not (3 tone marks, 4 dot-below letters)
 
 **Code-Switching:**
-- [11_codeswitch_en2ig.m4a](data/audio/11_codeswitch_en2ig.m4a) - English mostly transcribed, adjacent Igbo loses marks
+- [11_codeswitch_en2ig.m4a](data/audio/11_codeswitch_en2ig.m4a): English mostly transcribed, adjacent Igbo loses marks
 
 ## Quick Start
 
@@ -118,24 +120,26 @@ igbo-asr-tonal-evaluation/
 ├── CHANGELOG.md
 ├── LICENSE
 ├── README.md                             # This file
-└── requirements.txt                      # Python dependencies
+├── requirements-analysis.txt             # CPU-only analysis dependencies
+└── requirements.txt                      # Inference dependencies (GPU, omnilingual-asr)
 ```
 
 ## Documentation
 
-- [**Methodology**](docs/METHODOLOGY.md) – Detailed research design, metric definitions (DER, bootstrap CIs), error taxonomy, and recording protocol.
-- [**References**](docs/REFERENCES.md) – Full list of academic works cited in this project, including papers on ASR fairness, low-resource languages, and Igbo diacritic restoration.
+- [**Methodology**](docs/METHODOLOGY.md): Detailed research design, metric definitions (DER, bootstrap CIs), error taxonomy, and recording protocol.
+- [**References**](docs/REFERENCES.md): Full list of academic works cited in this project, including papers on ASR fairness, low-resource languages, and Igbo diacritic restoration.
 
 ## Key Results
 
 ### Quantitative Summary
 
-* E = expected marks 
+* E = expected marks (in the reference)
+* P = marks present in the model output
 * D = dropped (counted per clip, then summed)
 * H = added (counted per clip, then summed)
 * Net = (E - P) / E
 * Drop = D / E
-* Added = H / E 
+* Added = H / E
 * DER = (D + H) / E
 
 | Category | Clips | E | Dropped | Added | Net loss | Drop rate | Added rate | DER | Mean CER |
@@ -164,7 +168,7 @@ The unit of independent data is the clip, so clips are resampled (not individual
 
 ### Position-aware estimate
 
-Counts cannot tell a correct mark from a wrong mark. Aligning reference and output on base letters and classifying each mark gives, overall, 33 correct, 7 wrong, 57 missing and 31 inserted (tonal clips: 4 correct, 7 wrong, 38 missing, 8 inserted). This is an estimate: if the model mis-hears a letter, a mark can look missing because of the letter error, not the tone. See `analysis-2.ipynb`.
+Counts cannot tell a correct mark from a wrong mark. Aligning reference and output on base letters and classifying each mark gives, overall, 33 correct, 7 wrong, 57 missing and 31 inserted (tonal clips: 4 correct, 7 wrong, 38 missing, 8 inserted). This is an estimate: if the model mis-hears a letter, a mark can look missing because of the letter error, not the tone. The missing count (57) differs from the per-clip dropped count (51) because the two methods count differently. See `analysis-2.ipynb`.
 
 ### Caveats on the "added" marks
 
@@ -240,7 +244,7 @@ If you use the dataset, please cite:
 
 ```bibtex
 @misc{obasi2026igbo,
-  title={Igbo Blind Spot Dataset for omniASR-CTC-1B: Systematic Evaluation of Tonal Diacritic Loss},
+  title={Igbo Blind Spot Dataset for omniASR-CTC-1B: A Small Diagnostic Probe of Tone and Diacritic Loss},
   author={Obasi, Chizoba},
   year={2026},
   publisher={HuggingFace},
