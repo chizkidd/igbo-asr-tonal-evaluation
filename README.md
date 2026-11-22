@@ -194,7 +194,7 @@ Dot-below letters (ọ, ị, ụ) are counted as marks. Some references omit dot
 ## Example: Repeated Word With Four Written Tone Patterns
 
 **Reference (the author's written patterns):** "akwa, akwa, akwa. Akwà, akwà, akwà. Àkwà, àkwà, àkwà. Ákwá, ákwá, ákwá."
-(Four written tone patterns on one base string. They have not been independently verified as distinct words.)
+<!-- (Four written tone patterns on one base string. They have not been independently verified as distinct words.) -->
 
 **Model Output:** "akua akua akua akua akwa akwa akwa akua akwa ọkua ọkua ọkua"
 
