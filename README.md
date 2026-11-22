@@ -211,19 +211,19 @@ Dot-below letters (ọ, ị, ụ) are counted as marks. Some references omit dot
 
 ### Recording Details
 
-- **Speaker:** Author, native speaker of Afikpo Igbo (Ebonyi State); single speaker, not independently verified
-- **Device:** iPhone SE 2nd Generation
-- **Format:** M4A (AAC codec). Two export chains are present: clips 01 to 05 are 16 kHz with digital-silence gaps (about 36 to 39% exactly-zero samples), clips 06 to 21 are 48 kHz. The cause of the difference is unverified, and it is confounded with category, because clips 01 to 05 are the whole cross-lingual category
-- **Duration:** 3.9 to 16.7 seconds per sample
-- **References:** written by the speaker, who is also the only annotator. Tone and dot-below placement were not independently verified and were not checked against a documented standard source. No inter-annotator agreement exists
+- **Speaker:** Author, native speaker of Afikpo Igbo (Ebonyi State); single speaker.
+- **Device:** iPhone SE 2nd Generation.
+- **Format:** M4A (AAC codec). Two export chains are present: clips 01 to 05 are 16 kHz with digital-silence gaps (about 36 to 39% exactly-zero samples), clips 06 to 21 are 48 kHz. The cause of the difference is unverified, and it is confounded with category, because clips 01 to 05 are the whole cross-lingual category.
+- **Duration:** 3.9 to 16.7 seconds per sample.
+- **References:** written by the speaker, who is also the only annotator. Tone and dot-below placement were not independently verified and were not checked against a documented standard source. No inter-annotator agreement exists.
 
 ### Metrics
 
-- **Marks counted:** letters carrying grave, acute, macron or dot-below (one count per letter, even with dot plus tone); tone-only and dot-below counts are reported separately in the corrected analysis
-- **Net loss, drop rate, added rate, DER:** defined in the table above, with D and H computed per clip. These are count-based
-- **Position-aware classification:** base-letter-aware alignment for the corrected analysis; the legacy rule for the historical figures, which does not check base letters
-- **Uncertainty:** a rate carries an interval only for a reporting unit with at least 10 informative clips, so none of the rates here carries one; each is published as a count and a pooled rate
-- **CER:** Levenshtein distance divided by reference length. The historical table uses lowercased NFC text with punctuation kept; the corrected analysis states its normalisation profiles (`strict`, `tone_stripped`, `base_letters`)
+- **Marks counted:** letters carrying grave, acute, macron or dot-below (one count per letter, even with dot plus tone); tone-only and dot-below counts are reported separately in the corrected analysis.
+- **Net loss, drop rate, added rate, DER:** defined in the table above, with D and H computed per clip. These are count-based.
+- **Position-aware classification:** base-letter-aware alignment for the corrected analysis; the legacy rule for the historical figures, which does not check base letters.
+- **Uncertainty:** a rate carries an interval only for a reporting unit with at least 10 informative clips, so none of the rates here carries one; each is published as a count and a pooled rate.
+- **CER:** Levenshtein distance divided by reference length. The historical table uses lowercased NFC text with punctuation kept; the corrected analysis states its normalisation profiles (`strict`, `tone_stripped`, `base_letters`).
 
 Five things are easy to confuse and are kept apart here: count-based mark metrics, position-aware alignment, transcription accuracy (CER and WER), annotation validity (whether each reference mark is right), and acoustic tonal sensitivity (whether the model responds to pitch). Only the first three are measured, and none of them tests the last two.
 
