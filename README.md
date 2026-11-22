@@ -12,7 +12,7 @@ A diagnostic evaluation of tone and diacritic fidelity in `facebook/omniASR-CTC-
 
 ## Overview
 
-**Headline result.** In the four Igbo tonal clips the references carry 32 tone-marked letters. The model output carries 3 tone marks, all of them in clip 09, whose reference has none. Aligning reference and output on base letters and checking each reference mark, **0 of the 32 reference tone marks are reproduced**: 28 are missing on a correctly aligned letter, 4 sit on a letter the model got wrong or dropped, and none is missing because the letter itself was deleted. The optimal alignment is unique for each of these clips, and the totals do not change under five alternative scoring schemes.
+<u>**Headline result**</u>: In the four Igbo tonal clips the references carry 32 tone-marked letters. The model output carries 3 tone marks, all of them in clip 09, whose reference has none. Aligning reference and output on base letters and checking each reference mark, **0 of the 32 reference tone marks are reproduced**: 28 are missing on a correctly aligned letter, 4 sit on a letter the model got wrong or dropped, and none is missing because the letter itself was deleted. The optimal alignment is unique for each of these clips, and the totals do not change under five alternative scoring schemes.
 
 What the numbers also show:
 
